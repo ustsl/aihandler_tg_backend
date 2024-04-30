@@ -14,18 +14,9 @@ from src.handlers.base import router as base_router
 dp = Dispatcher()
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-# Загрузка переменных среды из файла .env
-
-
-# Bot token can be obtained via https://t.me/BotFather
-
-
-# All handlers should be attached to the Router (or Dispatcher)
-
 
 async def main() -> None:
     dp.include_router(base_router)
-
     await dp.start_polling(bot)
 
 

@@ -6,6 +6,7 @@ __pycache__/
 cache/
 .vscode/
 .venv/
+venv/
 .pytest_cache/
 __pycache__/
 docker-compose.yaml

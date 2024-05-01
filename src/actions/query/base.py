@@ -12,8 +12,8 @@ async def post_query(telegram_id: str, query: str, prompt_id: UUID, token: UUID)
             url=url, data=data, headers={"Authorization": token}
         )
         if result.get("result") and result.get("cost"):
-            string = f"{result.get("result")}\n\n<b>Cost: ${result.get("cost")}</b>"
-            return {"result":string}
+            string = f'{result.get("result")}\n\n<b>Cost: ${result.get("cost")}</b>'
+            return {"result": string}
         return result
     else:
         return {"result": "Prompt not selected. Please, use interface and set prompt"}

@@ -1,10 +1,9 @@
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-from aiogram import Dispatcher, html, Router
+from aiogram import Router
 
 from src.actions.query.base import post_query
 from src.actions.user.base import get_or_create_user, get_user
-from src.api.requests import post_request
 from src.keyboards.keyboard import main as kb
 from src.messages.base import start_message
 
@@ -20,7 +19,7 @@ async def command_start_handler(message: Message) -> None:
         user=message.from_user.full_name, balance=result.get("accounts").get("balance")
     )
 
-    await message.answer(msg)
+    await message.answer(msg, reply_markup=kb)
 
 
 @router.message()
@@ -37,7 +36,7 @@ async def post_query_handler(message: Message) -> None:
         )
         msg = result.get("result")
         if msg:
-            await message.answer(msg, reply_markup=kb)
+            await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:
             await message.answer("Error")
     except TypeError:

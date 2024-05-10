@@ -1,30 +1,45 @@
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from aiogram import Router
 
 from src.actions.query.base import post_query
 from src.actions.user.base import get_or_create_user, get_user
+from src.fsm.query import QueryState
 from src.keyboards.keyboard import main as kb
 from src.messages.base import start_message
+
+from aiogram.fsm.context import FSMContext
 
 router = Router()
 
 
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-
     result = await get_or_create_user(message.from_user.id)
-
     msg = start_message(
         user=message.from_user.full_name, balance=result.get("accounts").get("balance")
     )
-
     await message.answer(msg, reply_markup=kb)
 
 
+@router.message(Command("clear"))
+async def clear_handler(message: Message, state: FSMContext) -> None:
+    await state.set_state(QueryState.story)
+    await state.clear()
+    await message.answer("Message story has been deleted", reply_markup=kb)
+
+
 @router.message()
-async def post_query_handler(message: Message) -> None:
+async def post_query_handler(message: Message, state: FSMContext) -> None:
     try:
+        # Get story data
+        data = await state.get_data()
+        old_story = []
+        if data.get("story"):
+            old_story = data.get("story")
+
+        # Base action
+        await state.set_state(QueryState.story)
         user = await get_user(message.from_user.id)
         prompt_id = user.get("settings").get("prompt_id")
         token = user.get("token").get("token")
@@ -33,12 +48,22 @@ async def post_query_handler(message: Message) -> None:
             prompt_id=prompt_id,
             query=message.text,
             token=token,
+            story=old_story,
         )
+
         msg = result.get("result")
+
+        # Update story data
+        current_story = [
+            {"role": "user", "content": message.text},
+            {"role": "system", "content": result.get("clean")},
+        ]
+        new_story = [*old_story, *current_story][-30:]  # 30 - limit
+        await state.update_data(story=new_story)
+
         if msg:
             await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:
             await message.answer("Error")
-    except TypeError:
-        # But not all the types is supported to be copied so need to handle it
+    except Exception as e:
         await message.answer("Nice try!")

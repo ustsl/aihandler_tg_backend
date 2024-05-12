@@ -43,6 +43,9 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         user = await get_user(message.from_user.id)
         prompt_id = user.get("settings").get("prompt_id")
         token = user.get("token").get("token")
+
+        await message.answer("The request is being processed..", parse_mode=None)
+
         result = await post_query(
             telegram_id=message.from_user.id,
             prompt_id=prompt_id,
@@ -60,6 +63,8 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         ]
         new_story = [*old_story, *current_story][-30:]  # 30 - limit
         await state.update_data(story=new_story)
+
+        print(msg)
 
         if msg:
             await message.answer(msg, reply_markup=kb, parse_mode=None)

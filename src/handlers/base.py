@@ -71,4 +71,6 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         else:
             await message.answer("Error")
     except Exception as e:
-        await message.answer("Nice try!")
+        await message.answer(
+            "Error. Try clearing your message history using the /clear command and try again."
+        )

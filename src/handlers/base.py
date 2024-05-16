@@ -6,7 +6,7 @@ from src.actions.query.base import post_query
 from src.actions.user.base import get_or_create_user, get_user
 from src.fsm.query import QueryState
 from src.keyboards.keyboard import main as kb
-from src.messages.base import start_message
+from src.messages.base import about_message, start_message
 
 from aiogram.fsm.context import FSMContext
 
@@ -27,6 +27,14 @@ async def clear_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(QueryState.story)
     await state.clear()
     await message.answer("Message story has been deleted", reply_markup=kb)
+
+
+@router.message(Command("about"))
+async def clear_handler(message: Message, state: FSMContext) -> None:
+    await state.set_state(QueryState.story)
+    await state.clear()
+    msg = about_message()
+    await message.answer(msg, reply_markup=kb)
 
 
 @router.message()
@@ -63,8 +71,6 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         ]
         new_story = [*old_story, *current_story][-30:]  # 30 - limit
         await state.update_data(story=new_story)
-
-        print(msg)
 
         if msg:
             await message.answer(msg, reply_markup=kb, parse_mode=None)

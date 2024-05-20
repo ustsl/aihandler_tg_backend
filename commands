@@ -1,0 +1,4 @@
+start - restart bot
+clear - delete story for bots with memory
+about - about gpt in telegram
+refresh_token - update personal token

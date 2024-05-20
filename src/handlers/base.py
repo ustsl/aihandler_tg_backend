@@ -4,11 +4,14 @@ from aiogram import Router
 
 from src.actions.query.base import post_query
 from src.actions.user.base import get_or_create_user, get_user
+from src.api.requests import put_request
 from src.fsm.query import QueryState
 from src.keyboards.keyboard import main as kb
 from src.messages.base import about_message, start_message
 
 from aiogram.fsm.context import FSMContext
+
+from src.settings import API_DOMAIN, API_MAIN_TOKEN
 
 router = Router()
 
@@ -27,6 +30,13 @@ async def clear_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(QueryState.story)
     await state.clear()
     await message.answer("Message story has been deleted", reply_markup=kb)
+
+
+@router.message(Command("refresh_token"))
+async def clear_handler(message: Message) -> None:
+    url = f"{API_DOMAIN}v1/users/{str(message.from_user.id)}/token"
+    result = await put_request(url=url, headers={"Authorization": API_MAIN_TOKEN})
+    await message.answer("Token was refreshed", reply_markup=kb)
 
 
 @router.message(Command("about"))

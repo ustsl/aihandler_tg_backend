@@ -71,7 +71,8 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
             token=token,
             story=old_story,
         )
-        if result.get("status_code") == 403:
+
+        if result.get("detail"):
             msg = result.get("detail")
         else:
             msg = result.get("result")

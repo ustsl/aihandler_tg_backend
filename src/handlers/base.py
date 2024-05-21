@@ -72,7 +72,7 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
             story=old_story,
         )
         if result.get("status_code") == 403:
-            await message.answer(result.get("detail"))
+            msg = result.get("detail")
         else:
             msg = result.get("result")
             # Update story data
@@ -82,11 +82,10 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
             ]
             new_story = [*old_story, *current_story][-30:]  # 30 - limit
             await state.update_data(story=new_story)
-
-            if msg:
-                await message.answer(msg, reply_markup=kb, parse_mode=None)
-            else:
-                await message.answer("Error")
+        if msg:
+            await message.answer(msg, reply_markup=kb, parse_mode=None)
+        else:
+            await message.answer("Error")
     except Exception as e:
         await message.answer(
             "Error. Try clearing your message history using the /clear command and try again."

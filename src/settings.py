@@ -5,7 +5,7 @@ load_dotenv()
 
 API_DOMAIN = "https://aihandler.qsbot.app/"
 BOT_TOKEN = getenv("BOT_TOKEN")
-# BOT_TOKEN = getenv("BOT_TOKEN_TEST")
+BOT_TOKEN = getenv("BOT_TOKEN_TEST")
 
 
 API_MAIN_TOKEN = getenv("API_MAIN_TOKEN")

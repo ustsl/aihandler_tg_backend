@@ -12,15 +12,18 @@ from aiogram.enums import ParseMode
 
 from src.settings import BOT_TOKEN
 
-from src.handlers.base import router as base_router
-
+from src.handlers.main.handlers import router as main_router
+from src.handlers.tech.handlers import router as tech_router
+from src.handlers.query.handlers import router as query_router
 
 dp = Dispatcher()
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
 async def main() -> None:
-    dp.include_router(base_router)
+    dp.include_router(main_router)
+    dp.include_router(tech_router)
+    dp.include_router(query_router)
     await dp.start_polling(bot)
 
 

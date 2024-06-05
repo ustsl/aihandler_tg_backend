@@ -47,9 +47,13 @@ async def language_callback(query: CallbackQuery, callback_data: LangCallback):
 
 @router.message(Command("about"))
 async def clear_handler(message: Message, state: FSMContext) -> None:
+    print(312312312321312312)
     user = await get_or_create_user(message.from_user.id)
-    current_lang = user.get("settings").get("language")
+    print(user)
+    current_lang = (user.get("settings")).get("language")
     await state.set_state(QueryState.story)
     await state.clear()
-    msg = about_message.get(current_lang, "en")
+    if not current_lang:
+        current_lang = "en"
+    msg = about_message.get(current_lang)
     await message.answer(msg, reply_markup=kb)

@@ -10,6 +10,12 @@ from src.keyboards.main_kb import keyboard as kb
 
 from aiogram.fsm.context import FSMContext
 
+import io
+import aiohttp
+from aiogram import Bot, Dispatcher, types
+
+from src.settings import API_MAIN_TOKEN
+
 
 router = Router()
 
@@ -21,8 +27,86 @@ async def wait_handler(message: Message, state: FSMContext) -> None:
     )
 
 
+# Need refactoting
+@router.message(F.photo)
+async def image_handler(message: Message, state: FSMContext) -> None:
+    await state.set_state(QueryState.start)
+    try:
+        # SET state process
+        await state.set_state(QueryState.wait)
+
+        file_id = message.photo[-1].file_id
+        file = await message.bot.get_file(file_id)
+        file_path = file.file_path
+        file_data = await message.bot.download_file(file_path)
+        photo_bytes = io.BytesIO(file_data.getvalue())
+
+        # URL и headers для POST-запроса
+        url = f"https://filestorage.imvo.site/v1/files/image/{message.from_user.id}"
+        headers = {"Authorization": API_MAIN_TOKEN}
+        path = None
+        is_downloaded = False
+        # Отправка POST-запроса с фото
+        async with aiohttp.ClientSession() as session:
+            form_data = aiohttp.FormData()
+            form_data.add_field(
+                "file", photo_bytes, filename="image.jpg", content_type="image/jpeg"
+            )
+
+            async with session.post(url, headers=headers, data=form_data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    if result.get("path"):
+                        path = result.get("path")
+                        is_downloaded = True
+
+        if is_downloaded:
+            query = f"https://filestorage.imvo.site/v1/files/?path={path}"
+            user = await get_user(message.from_user.id)
+            prompt_id = user.get("settings").get("prompt_id")
+            token = user.get("token").get("token")
+            await message.answer("The request is being processed..", parse_mode=None)
+
+            result = await post_query(
+                telegram_id=message.from_user.id,
+                prompt_id=prompt_id,
+                query=query,
+                token=token,
+                story=[],
+                vision=True,
+            )
+
+            if result.get("detail"):
+                msg = result.get("detail")
+            else:
+                msg = result.get("result")
+
+            if msg:
+                await message.answer(msg, reply_markup=kb, parse_mode=None)
+            else:
+                await message.answer("Error")
+
+            async with aiohttp.ClientSession() as session:
+                async with session.delete(query, headers=headers) as delete_response:
+                    if delete_response.status == 200:
+                        print("File deleted successfully")
+                    else:
+                        print("Failed to delete file")
+
+        await state.clear()
+
+    except Exception as e:
+        print(e)
+        await state.clear()
+        await message.answer(
+            "Error. Try clearing your message history using the /clear command and try again."
+        )
+
+
+# Need refactoting
 @router.message(F.text)
 async def post_query_handler(message: Message, state: FSMContext) -> None:
+    await state.set_state(QueryState.start)
     try:
         # SET state process
         await state.set_state(QueryState.wait)

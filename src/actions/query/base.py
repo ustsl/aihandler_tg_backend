@@ -5,11 +5,21 @@ from src.settings import API_DOMAIN
 
 
 async def post_query(
-    telegram_id: str, query: str, prompt_id: UUID, token: UUID, story: list = []
+    telegram_id: str,
+    query: str,
+    prompt_id: UUID,
+    token: UUID,
+    story: list = [],
+    vision: bool = True,
 ):
     if prompt_id:
         url = f"{API_DOMAIN}v1/queries/{str(telegram_id)}"
-        data = {"prompt_id": str(prompt_id), "query": query, "story": story}
+        data = {
+            "prompt_id": str(prompt_id),
+            "query": query,
+            "story": story,
+            "vision": vision,
+        }
         result = await post_request(
             url=url, data=data, headers={"Authorization": token}
         )

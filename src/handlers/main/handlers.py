@@ -1,3 +1,4 @@
+from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram import F, Router
@@ -6,11 +7,12 @@ from src.actions.user.base import get_or_create_user
 
 
 from src.actions.user.settings import update_language
+
 from src.keyboards.main_kb import keyboard as kb
 from src.keyboards.lang_kb import LangCallback, main_lang_keyboard
 from src.messages.base import start_message
 
-from aiogram.filters import Command
+
 from aiogram.types import Message, CallbackQuery
 
 from aiogram import F, Router
@@ -20,7 +22,8 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
+async def command_start_handler(message: Message, state: FSMContext) -> None:
+    await state.clear()
     result = await get_or_create_user(message.from_user.id)
     current_lang = result.get("settings").get("language")
     if not current_lang:

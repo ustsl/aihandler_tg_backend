@@ -12,8 +12,9 @@ from aiogram.fsm.context import FSMContext
 
 import io
 import aiohttp
-from aiogram import Bot, Dispatcher, types
 
+
+from src.modules.filestorage.action import FileStorageAction
 from src.settings import API_MAIN_TOKEN
 
 
@@ -42,23 +43,18 @@ async def image_handler(message: Message, state: FSMContext) -> None:
         photo_bytes = io.BytesIO(file_data.getvalue())
 
         # URL и headers для POST-запроса
-        url = f"https://filestorage.imvo.site/v1/files/image/{message.from_user.id}"
+
         headers = {"Authorization": API_MAIN_TOKEN}
         path = None
         is_downloaded = False
         # Отправка POST-запроса с фото
-        async with aiohttp.ClientSession() as session:
-            form_data = aiohttp.FormData()
-            form_data.add_field(
-                "file", photo_bytes, filename="image.jpg", content_type="image/jpeg"
-            )
 
-            async with session.post(url, headers=headers, data=form_data) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    if result.get("path"):
-                        path = result.get("path")
-                        is_downloaded = True
+        url = f"https://filestorage.imvo.site/v1/files/image/{message.from_user.id}"
+
+        filestorage_action = FileStorageAction()
+        download_result = await filestorage_action.download(url=url, file=photo_bytes)
+        path = download_result.get("path")
+        is_downloaded = download_result.get("is_downloaded")
 
         if is_downloaded:
             query = f"https://filestorage.imvo.site/v1/files/?path={path}"
@@ -129,6 +125,7 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
             query=message.text,
             token=token,
             story=old_story,
+            vision=False,
         )
 
         if result.get("detail"):
@@ -141,14 +138,15 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
                 {"role": "system", "content": result.get("clean")},
             ]
             new_story = [*old_story, *current_story][-30:]  # 30 - limit
-            await state.set_state(QueryState.story)
-            await state.update_data(story=new_story)
+        await state.set_state(QueryState.story)
+        await state.update_data(story=new_story)
         if msg:
             await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:
             await message.answer("Error")
     except Exception as e:
         await state.clear()
+        await message.answer(str(e))
         await message.answer(
             "Error. Try clearing your message history using the /clear command and try again."
         )

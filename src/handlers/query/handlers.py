@@ -1,3 +1,5 @@
+import re
+
 from aiogram.types import Message
 from aiogram import F, Router
 
@@ -21,6 +23,11 @@ from src.settings import API_MAIN_TOKEN
 router = Router()
 
 
+IMAGE_URL_PATTERN = re.compile(
+    r"(https?://.*\.(?:png|jpg|jpeg|gif|bmp|svg|webp))", re.IGNORECASE
+)
+
+
 @router.message(QueryState.wait)
 async def wait_handler(message: Message, state: FSMContext) -> None:
     await message.answer(
@@ -33,6 +40,7 @@ async def wait_handler(message: Message, state: FSMContext) -> None:
 async def image_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(QueryState.start)
     try:
+
         # SET state process
         await state.set_state(QueryState.wait)
 
@@ -103,6 +111,7 @@ async def image_handler(message: Message, state: FSMContext) -> None:
 @router.message(F.text)
 async def post_query_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(QueryState.start)
+
     try:
         # SET state process
         await state.set_state(QueryState.wait)
@@ -132,6 +141,7 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
             msg = result.get("detail")
         else:
             msg = result.get("result")
+            clean_message = result.get("clean")
             # Update story data
             current_story = [
                 {"role": "user", "content": message.text},
@@ -142,7 +152,12 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         await state.set_state(QueryState.story)
 
         if msg:
-            await message.answer(msg, reply_markup=kb, parse_mode=None)
+            if IMAGE_URL_PATTERN.match(msg):
+                await message.answer_photo(
+                    clean_message, caption=msg, parse_mode="HTML", reply_markup=kb
+                )
+            else:
+                await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:
             await message.answer("Error")
     except Exception as e:

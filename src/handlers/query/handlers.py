@@ -138,8 +138,9 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
                 {"role": "system", "content": result.get("clean")},
             ]
             new_story = [*old_story, *current_story][-30:]  # 30 - limit
+            await state.update_data(story=new_story)  # update story
         await state.set_state(QueryState.story)
-        await state.update_data(story=new_story)
+
         if msg:
             await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:

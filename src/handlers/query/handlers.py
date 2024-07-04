@@ -1,5 +1,5 @@
 import re
-
+import asyncio
 from aiogram.types import Message
 from aiogram import F, Router
 
@@ -157,6 +157,12 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
                     clean_message, caption=msg, parse_mode="HTML", reply_markup=kb
                 )
             else:
+                chunk_size = 4000
+                for i in range(0, len(msg), chunk_size):
+                    await message.answer(
+                        msg[i : i + chunk_size], reply_markup=kb, parse_mode=None
+                    )
+                    await asyncio.sleep(1)
                 await message.answer(msg, reply_markup=kb, parse_mode=None)
         else:
             await message.answer("Error")

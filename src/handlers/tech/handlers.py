@@ -1,3 +1,4 @@
+import asyncio
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
@@ -47,7 +48,6 @@ async def language_callback(query: CallbackQuery, callback_data: LangCallback):
 
 @router.message(Command("about"))
 async def clear_handler(message: Message, state: FSMContext) -> None:
-    print(312312312321312312)
     user = await get_or_create_user(message.from_user.id)
     print(user)
     current_lang = (user.get("settings")).get("language")

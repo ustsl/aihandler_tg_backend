@@ -163,7 +163,7 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
                         msg[i : i + chunk_size], reply_markup=kb, parse_mode=None
                     )
                     await asyncio.sleep(1)
-                await message.answer(msg, reply_markup=kb, parse_mode=None)
+
         else:
             await message.answer("Error")
     except Exception as e:

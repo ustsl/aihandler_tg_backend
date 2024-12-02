@@ -46,5 +46,4 @@ async def language_callback(query: CallbackQuery, callback_data: LangCallback):
     msg = start_message(
         user="", balance=result.get("accounts").get("balance"), language=lang
     )
-
     await query.message.answer(msg, reply_markup=kb)

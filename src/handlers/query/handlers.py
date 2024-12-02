@@ -158,12 +158,19 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
                 )
             else:
                 chunk_size = 4000
-                for i in range(0, len(msg), chunk_size):
-                    await message.answer(
-                        msg[i : i + chunk_size], reply_markup=kb, parse_mode=None
-                    )
-                    await asyncio.sleep(1)
 
+                for i in range(0, len(msg), chunk_size):
+                    current_chunk = msg[i : i + chunk_size]
+                    formatted_chunk = format_chatgpt_code(current_chunk)
+                    try:
+                        await message.answer(
+                            formatted_chunk, reply_markup=kb, parse_mode="HTML"
+                        )
+                    except Exception as e:
+                        await message.answer(
+                            current_chunk, reply_markup=kb, parse_mode=None
+                        )
+                    await asyncio.sleep(1)
         else:
             await message.answer("Error")
     except Exception as e:
@@ -172,3 +179,16 @@ async def post_query_handler(message: Message, state: FSMContext) -> None:
         await message.answer(
             "Error. Try clearing your message history using the /clear command and try again."
         )
+
+
+def format_chatgpt_code(msg: str) -> str:
+    """
+    Форматирует текст сообщения: заменяет блоки кода в стиле ChatGPT
+    (тройные обратные кавычки) на HTML-теги <pre><code>.
+    """
+    return re.sub(
+        r"```(.*?)```",  # Регулярное выражение для поиска блоков кода
+        r"<pre><code>\1</code></pre>",
+        msg,
+        flags=re.DOTALL,  # Обрабатывает многострочные блоки
+    )

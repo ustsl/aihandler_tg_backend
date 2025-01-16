@@ -3,7 +3,7 @@ from os import getenv
 
 load_dotenv()
 
-API_DOMAIN = "https://api.qspk.me/"
+API_DOMAIN = "https://imvo.qspk.me/"
 BOT_TOKEN = getenv("BOT_TOKEN")
 # BOT_TOKEN = getenv("BOT_TOKEN_TEST")
 

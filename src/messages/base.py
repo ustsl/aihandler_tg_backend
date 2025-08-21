@@ -1,3 +1,6 @@
+from src.settings import STARS_PRICE
+
+
 def start_message(user: str, balance: str, language: str):
     messages = {
         "en": f"""
@@ -30,7 +33,7 @@ The chatbot works within the prompt you choose.  More information on the links i
 
 Чат-бот работает в рамках выбранного вами промпта. Дополнительная информация по ссылкам в меню.
 
-<b>Ваш текущий баланс: ${balance}</b>.
+<b>Ваш текущий баланс: {round(float(balance) / STARS_PRICE, 2)} ⭐</b>
     """,
         "tr": f"""
     Merhaba {user}
@@ -46,7 +49,7 @@ Promtlarınızdan para kazanın veya kendi görevlerinizi tamamlayın.
 
 Chatbot, seçtiğiniz promt içinde çalışır. Menüdeki bağlantılarda daha fazla bilgi bulabilirsiniz.
 
-<b>Mevcut bakiyeniz: ${balance}</b>.
+<b>Mevcut bakiyeniz: {round(float(balance) / 0.013, 2)} ⭐</b>
     """,
     }
 

@@ -1,6 +1,11 @@
 from dotenv import load_dotenv
 from os import getenv
 
+SUBSCRIPTION_PRICE = 100
+
+STARS_PRICE = 0.013
+
+
 load_dotenv()
 
 API_DOMAIN = "https://imvo.qspk.me/"
